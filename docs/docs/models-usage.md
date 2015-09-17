@@ -1,6 +1,8 @@
 ## Data retrieval / Finders
 
-Finder methods are designed to get data from the database&period; The returned data isn't just a plain object&comma; but instances of one of the defined classes&period; Check the next major chapter about instances for further information&period; But as those things are instances&comma; you can e&period;g&period; use the just describe expanded instance methods&period; So&comma; here is what you can do&colon;
+Finder methods are intended to query data from the database&period; They do *not* return plain objects but instead return model instances&period; Because finder methods return model instances you can call any model instance member on the result as described in the documentation for [*instances*](http://docs.sequelizejs.com/en/latest/docs/instances/)&period;
+
+In this document we'll explore what finder methods can do&colon;
 
 ### find - Search for one specific element in the database
 ```js
@@ -326,7 +328,7 @@ Sometimes you might be expecting a massive dataset that you just want to display
 // Are you expecting a massive dataset from the DB,
 // and don't want to spend the time building DAOs for each entry?
 // You can pass an extra query option to get the raw data instead:
-Project.findAll({ where: ... }, { raw: true })
+Project.findAll({ where: { ... }, raw: true })
 ```
 
 ### count - Count the occurences of elements in the database
