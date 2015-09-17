@@ -8,7 +8,11 @@ var chai = require('chai')
   , DataTypes = require(__dirname + '/../../../lib/data-types');
 var SEARCH_PATH_ONE = 'schema_one,public';
 var SEARCH_PATH_TWO = 'schema_two,public';
-var current = Support.sequelize;
+var current = Support.createSequelizeInstance({
+  dialectOptions: {
+    preprendSearchPath: true
+  }
+});
 var locationId;
 
 describe(Support.getTestDialectTeaser('Model'), function() {
@@ -16,7 +20,6 @@ describe(Support.getTestDialectTeaser('Model'), function() {
 
     describe('SEARCH PATH', function() {
       before(function() {
-        current.options.dialectOptions.preprendSearchPath = true;
         this.Restaurant = current.define('restaurant', {
             foo: DataTypes.STRING,
             bar: DataTypes.STRING
