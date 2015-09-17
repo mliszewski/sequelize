@@ -10,7 +10,7 @@ var SEARCH_PATH_ONE = 'schema_one,public';
 var SEARCH_PATH_TWO = 'schema_two,public';
 var current = Support.createSequelizeInstance({
   dialectOptions: {
-    preprendSearchPath: true
+    prependSearchPath: true
   }
 });
 var locationId;
