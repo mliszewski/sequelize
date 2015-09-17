@@ -16,6 +16,7 @@ describe(Support.getTestDialectTeaser('Model'), function() {
 
     describe('SEARCH PATH', function() {
       before(function() {
+        current.options.dialectOptions.preprendSearchPath = true;
         this.Restaurant = current.define('restaurant', {
             foo: DataTypes.STRING,
             bar: DataTypes.STRING
@@ -46,7 +47,7 @@ describe(Support.getTestDialectTeaser('Model'), function() {
         });
       });
 
-      beforeEach(function() {
+      beforeEach('build restaurant tables', function() {
         var Restaurant = this.Restaurant;
         return current.createSchema('schema_one').then(function() {
           return current.createSchema('schema_two');
@@ -59,7 +60,7 @@ describe(Support.getTestDialectTeaser('Model'), function() {
         });
       });
 
-      afterEach(function() {
+      afterEach('drop schemas',function() {
         return current.dropSchema('schema_one').then(function() {
           return current.dropSchema('schema_two');
         });
@@ -423,6 +424,38 @@ describe(Support.getTestDialectTeaser('Model'), function() {
             expect(restaurant).to.not.be.null;
             expect(restaurant.foo).to.equal('two');
           });
+        });
+      });
+
+      describe('concurency tests', function() {
+        it('should build and persist instances to 2 schemas concurrently in any order', function() {
+          var Restaurant = this.Restaurant;
+
+          var restaurauntModelSchema1 = Restaurant.build({bar: 'one.1'});
+          var restaurauntModelSchema2 = Restaurant.build({bar: 'two.1'});
+
+          return restaurauntModelSchema1.save({searchPath: SEARCH_PATH_ONE})
+            .then(function() {
+              restaurauntModelSchema1 = Restaurant.build({bar: 'one.2'});
+              return restaurauntModelSchema2.save({searchPath: SEARCH_PATH_TWO});
+            }).then(function() {
+              return restaurauntModelSchema1.save({searchPath: SEARCH_PATH_ONE});
+            }).then(function() {
+              return Restaurant.findAll({searchPath: SEARCH_PATH_ONE});
+            }).then(function(restaurantsOne) {
+              expect(restaurantsOne).to.not.be.null;
+              expect(restaurantsOne.length).to.equal(2);
+              restaurantsOne.forEach(function(restaurant) {
+                expect(restaurant.bar).to.contain('one');
+              });
+              return Restaurant.findAll({searchPath: SEARCH_PATH_TWO});
+            }).then(function(restaurantsTwo) {
+              expect(restaurantsTwo).to.not.be.null;
+              expect(restaurantsTwo.length).to.equal(1);
+              restaurantsTwo.forEach(function(restaurant) {
+                expect(restaurant.bar).to.contain('two');
+              });
+            });
         });
       });
     });
